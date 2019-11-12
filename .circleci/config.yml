@@ -15,7 +15,7 @@ jobs:
       - run: |
             echo "Foo!"
             echo "Foo!"
-            exit 0
+            exit 1
 
   cd-job:
     executor: my-executor
