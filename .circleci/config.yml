@@ -1,0 +1,28 @@
+version: 2.1
+
+executors:
+  my-executor:
+    docker:
+      - image: circleci/node:10.13.0-jessie
+    working_directory: /tmp
+
+jobs:
+
+  ci-job:
+    executor: my-executor
+    steps:
+      - checkout
+
+      - run: |
+            echo "Foo"
+            exit 1
+
+workflows:
+  version: 2
+
+  dummy-workflow:
+    jobs:
+      - ci-job
+          filters:
+            branches:
+              ignore: /master/
