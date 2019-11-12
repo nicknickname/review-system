@@ -4,7 +4,6 @@ executors:
   my-executor:
     docker:
       - image: circleci/node:10.13.0-jessie
-    working_directory: /tmp
 
 jobs:
 
