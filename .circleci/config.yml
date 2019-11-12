@@ -21,7 +21,7 @@ workflows:
   version: 2
   dummy-workflow:
     jobs:
-      - ci-job
+      - ci-job:
           filters:
             branches:
               ignore: /master/
