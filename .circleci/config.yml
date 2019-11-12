@@ -19,7 +19,6 @@ jobs:
 
 workflows:
   version: 2
-
   dummy-workflow:
     jobs:
       - ci-job
