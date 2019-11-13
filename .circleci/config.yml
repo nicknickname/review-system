@@ -39,14 +39,17 @@ commands:
               newversion=$( echo $newversion | awk 'BEGIN {FS=" "} {print $1}')
 
               echo "oldversion:$oldversion newversion:$newversion"
+
               # if package version was not changed in the given commit range, the job will fail with exit code 1
               if [ -z "$newversion" ]; then
-                  echo "FAIL! Version in the ${PACKAGE_PATH}/package.json was not updated !!!"
+                  echo "FAIL! Version in the package.json was not updated !!!"
                   circleci step halt
                   exit 1
               fi
 
               # Check version number for updates
+              oldmajor=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $1}')
+              newmajor=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $1}')
               echo "oldmajor:$oldmajor newmajor:$newmajor"
 
               if [ ${oldmajor:-} -gt ${newmajor:-} ]; then
