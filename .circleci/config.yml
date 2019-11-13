@@ -12,10 +12,10 @@ executors:
     docker:
       - image: circleci/node:10.13.0-jessie-browsers
     resource_class: small
-  executor-large:
+  executor-medium:
     docker:
       - image: circleci/node:10.13.0-jessie-browsers
-    resource_class: large
+    resource_class: medium
 
 
 commands:
@@ -107,14 +107,14 @@ jobs:
       - validate-versions
 
   ci-job:
-    executor: executor-large
+    executor: executor-medium
     working_directory: ~/tmp
     steps:
       - checkout
       - test-lint-build
 
   cd-job:
-    executor: executor-large
+    executor: executor-medium
     working_directory: ~/tmp
     steps:
       - checkout
