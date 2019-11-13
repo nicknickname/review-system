@@ -1,40 +1,139 @@
+# Following stanza uses CircleCI 2.1 to make use of a executors, commands and orbs
 version: 2.1
 
+# Note: CircleCI occasionally makes scheduled changes to images to fix bugs or otherwise improve functionality, 
+# and these changes can sometimes cause affect how images work in CircleCI jobs. 
+# Please follow the convenience-images tag on Discuss to be notified in advance of scheduled maintenance.
+# TODO We can create our oun image to speed up builds: https://circleci.com/docs/2.0/private-images/
+# Here I use image from https://hub.docker.com/r/circleci/node/, with an appropriate docker version
+# Use circleci/node:10.13.0-jessie for the version without browsers installed
 executors:
-  my-executor:
+  executor-small:
     docker:
-      - image: circleci/node:10.13.0-jessie
+      - image: circleci/node:10.13.0-jessie-browsers
+    resource_class: small
+  executor-large:
+    docker:
+      - image: circleci/node:10.13.0-jessie-browsers
+    resource_class: large
+
+
+commands:
+  validate-versions:
+    description: "Checking for package versions bump"
+    steps:
+      - run:
+          name: Checking for package versions bumping
+          command: |
+            # Checking version bump if any file but README was changed
+            if test -n "$(git diff --name-only origin/master...HEAD | grep  -v 'README.md' )"; then
+              echo "Source code files changed!"
+
+              # CI job always applied only to the feature branch, retrieving version number from origin/master and current branch
+              masterversion=$(git show origin/master:${PACKAGE_PATH}/package.json | grep 'version' | sed 's/[version:,\",]//g' | xargs)
+              oldversion=${masterversion:="0.0.0"} # If it is new-created package, set value to 0 0.0.0
+              newversion=$(grep 'version' ${PACKAGE_PATH}/package.json | sed 's/[version:,\",]//g' | xargs)
+
+              # To cut of git diff information
+              oldversion=$( echo $oldversion | awk 'BEGIN {FS=" "} {print $1}')
+              newversion=$( echo $newversion | awk 'BEGIN {FS=" "} {print $1}')
+
+              echo "oldversion:$oldversion newversion:$newversion"
+              # if package version was not changed in the given commit range, the job will fail with exit code 1
+              if [ -z "$newversion" ]; then
+                  echo "FAIL! Version in the ${PACKAGE_PATH}/package.json was not updated !!!"
+                  circleci step halt
+                  exit 1
+              fi
+
+              # Check version number for updates
+              echo "oldmajor:$oldmajor newmajor:$newmajor"
+
+              if [ ${oldmajor:-} -gt ${newmajor:-} ]; then
+                  echo "FAIL! ${oldmajor:-} is greater than ${newmajor:-}"
+                  exit 1
+              fi
+
+              if [ ${oldmajor:-} -lt ${newmajor:-} ]; then
+                  echo "${oldmajor:-} is less than ${newmajor:-}, test OK"
+                  exit 0
+              fi
+
+              echo "Checking minor"
+              oldminor=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $2}')
+              newminor=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $2}')
+              echo "oldminor:$oldminor newminor:$newminor"
+
+              if [ ${oldminor:-} -gt ${newminor:-} ]; then
+                  echo "FAIL! ${oldminor:-} is greater than ${newminor:-}"
+                  exit 1
+              fi
+
+              if [ ${oldminor:-} -lt ${newminor:-} ]; then
+                  echo "${oldminor:-} is less than ${newminor:-}, package version test OK"
+                  exit 0
+              fi
+
+              echo "Minor not updated. Checking patch"
+              oldpatch=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $3}')
+              newpatch=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $3}')
+              echo "oldpatch:$oldpatch newpatch:$newpatch"
+
+              if [ ${oldpatch:-} -lt ${newpatch:-} ]; then
+                  echo "Patch updated, test OK"
+              else
+                  echo "FAIL! Version was not updated !!!"
+                  exit 1
+              fi          
+            fi
+
+  test-lint-build:
+    steps:
+      - run:
+          name: Testing react-components.
+          command: |
+            echo "Testing, linting and building..."
+            # npm install
+            # Run test / lint / build for the application
+
 
 jobs:
 
-  ci-job:
-    executor: my-executor
+  pre-check:
+    executor: executor-small
+    working_directory: ~/tmp
     steps:
       - checkout
+      - validate-versions
 
-      - run: |
-            echo "Foo!"
-            echo "Foo!"
-            exit 1
+  ci-job:
+    executor: executor-large
+    working_directory: ~/tmp
+    steps:
+      - checkout
+      - test-lint-build
 
   cd-job:
-    executor: my-executor
+    executor: executor-large
+    working_directory: ~/tmp
     steps:
       - checkout
-      - run: |
-            echo "I will deploy!"
-            echo "I will survive!"
-            exit 0
+      - test-lint-build
 
 workflows:
-  version: 2
-  dummy-workflow:
-    jobs:
-      - ci-job:
-          filters:
-            branches:
-              ignore: /master/
-      - cd-job:
-          filters:
-            branches:
-              only: /master/
+    workflow-1:
+      jobs:
+        - pre-check:
+            filters:
+              branches:
+                ignore: /master/
+        - ci-job:
+            requires:
+              - ci-precheck-job
+            filters:
+              branches:
+                ignore: /master/
+        - cd-job:
+            filters:
+              branches:
+                only: /master/
