@@ -30,9 +30,9 @@ commands:
               echo "Source code files changed!"
 
               # CI job always applied only to the feature branch, retrieving version number from origin/master and current branch
-              masterversion=$(git show origin/master:${PACKAGE_PATH}/package.json | grep 'version' | sed 's/[version:,\",]//g' | xargs)
+              masterversion=$(git show origin/master:package.json | grep 'version' | sed 's/[version:,\",]//g' | xargs)
               oldversion=${masterversion:="0.0.0"} # If it is new-created package, set value to 0 0.0.0
-              newversion=$(grep 'version' ${PACKAGE_PATH}/package.json | sed 's/[version:,\",]//g' | xargs)
+              newversion=$(grep 'version' package.json | sed 's/[version:,\",]//g' | xargs)
 
               # To cut of git diff information
               oldversion=$( echo $oldversion | awk 'BEGIN {FS=" "} {print $1}')
