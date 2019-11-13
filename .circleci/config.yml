@@ -63,8 +63,8 @@ commands:
               fi
 
               echo "Checking minor"
-              oldminor=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $2}')
-              newminor=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $2}')
+              oldminor=$( echo $oldversion | awk 'BEGIN {FS="."} {print $2}')
+              newminor=$( echo $newversion | awk 'BEGIN {FS="."} {print $2}')
               echo "oldminor:$oldminor newminor:$newminor"
 
               if [ ${oldminor:-} -gt ${newminor:-} ]; then
@@ -78,8 +78,8 @@ commands:
               fi
 
               echo "Minor not updated. Checking patch"
-              oldpatch=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $3}')
-              newpatch=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $3}')
+              oldpatch=$( echo $oldversion | awk 'BEGIN {FS="."} {print $3}')
+              newpatch=$( echo $newversion | awk 'BEGIN {FS="."} {print $3}')
               echo "oldpatch:$oldpatch newpatch:$newpatch"
 
               if [ ${oldpatch:-} -lt ${newpatch:-} ]; then
