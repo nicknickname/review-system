@@ -129,7 +129,7 @@ workflows:
                 ignore: /master/
         - ci-job:
             requires:
-              - ci-precheck-job
+              - pre-check
             filters:
               branches:
                 ignore: /master/
