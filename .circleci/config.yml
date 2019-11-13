@@ -84,7 +84,10 @@ commands:
               else
                   echo "FAIL! Version was not updated !!!"
                   exit 1
-              fi          
+              fi
+
+            else
+              echo "No changed source code files, probably only README was changed."            
             fi
 
   test-lint-build:
@@ -99,18 +102,12 @@ commands:
 
 jobs:
 
-  pre-check:
-    executor: executor-small
-    working_directory: ~/tmp
-    steps:
-      - checkout
-      - validate-versions
-
   ci-job:
     executor: executor-medium
     working_directory: ~/tmp
     steps:
       - checkout
+      - validate-versions
       - test-lint-build
 
   cd-job:
@@ -123,13 +120,7 @@ jobs:
 workflows:
     workflow-1:
       jobs:
-        - pre-check:
-            filters:
-              branches:
-                ignore: /master/
         - ci-job:
-            requires:
-              - pre-check
             filters:
               branches:
                 ignore: /master/
