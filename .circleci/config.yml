@@ -90,7 +90,7 @@ commands:
   test-lint-build:
     steps:
       - run:
-          name: Testing react-components.
+          name: Testing & linting & building
           command: |
             echo "Testing, linting and building..."
             # npm install
