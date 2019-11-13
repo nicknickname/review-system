@@ -48,8 +48,8 @@ commands:
               fi
 
               # Check version number for updates
-              oldmajor=$( echo $OLD_VERSION | awk 'BEGIN {FS="."} {print $1}')
-              newmajor=$( echo $NEW_VERSION | awk 'BEGIN {FS="."} {print $1}')
+              oldmajor=$( echo $oldversion| awk 'BEGIN {FS="."} {print $1}')
+              newmajor=$( echo $newversion | awk 'BEGIN {FS="."} {print $1}')
               echo "oldmajor:$oldmajor newmajor:$newmajor"
 
               if [ ${oldmajor:-} -gt ${newmajor:-} ]; then
